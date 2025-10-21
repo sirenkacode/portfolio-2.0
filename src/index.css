@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* extras tuyos */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+::selection { background: #111; color: #fff; }
+
+
+body {
+  font-family: "Major Mono Display", monospace;
+}
