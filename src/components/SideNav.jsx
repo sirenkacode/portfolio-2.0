@@ -1,6 +1,6 @@
 // src/components/SideNav.jsx
 import { useEffect, useState, useCallback } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 const SECTIONS = [
   { id: "info",        label: "info" },
