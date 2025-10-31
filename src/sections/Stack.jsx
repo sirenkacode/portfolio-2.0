@@ -1,4 +1,4 @@
-import Section from '../components/section'
+import Section from '../components/Section.jsx'
 const stack = ['React','Vite','Tailwind','Framer Motion','Zustand','Firebase/Firestore','Vercel','Git/GitHub']
 export default function Stack() {
   return (

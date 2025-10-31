@@ -1,4 +1,4 @@
-import Section from '../components/section'
+import Section from '../components/Section.jsx'
 export default function Contact() {
   return (
     <Section id="contacto">

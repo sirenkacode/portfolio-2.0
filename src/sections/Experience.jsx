@@ -1,4 +1,4 @@
-import Section from '../components/Section'
+import Section from '../components/Section.jsx'
 const roles = [
   { role: 'UI Developer — Freelance', period: '2024–2025', bullets: ['E-commerce React','Sistemas de diseño','Performance'] },
   { role: 'Soporte PT/ES', period: '2019–2023', bullets: ['Atención bilingüe','Procesos y QA','Documentación'] },

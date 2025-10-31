@@ -1,4 +1,4 @@
-import Section from '../components/section'
+import Section from '../components/Section.jsx'
 const items = [
   { title: 'Reboot — E-commerce tech second-hand', tags: ['React','Firestore','UI'] },
   { title: 'EcoResi — Conciencia ambiental', tags: ['Bootstrap','UX','Landing'] },
