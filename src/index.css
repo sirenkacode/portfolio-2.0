@@ -5,6 +5,7 @@
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 ::selection { background: #111; color: #fff; }
 
+html { scroll-behavior: smooth; }
 
 body {
   font-family: "Major Mono Display", monospace;

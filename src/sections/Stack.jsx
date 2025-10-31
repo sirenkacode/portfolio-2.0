@@ -6,7 +6,7 @@ export default function Stack() {
       <div>
         <h2 className="font-display text-3xl sm:text-4xl">Stack</h2>
         <ul className="mt-6 flex flex-wrap gap-3">
-          {stack.map(s => <li key={s} className="px-3 py-2 rounded-xl border border-black/10">{s}</li>)}
+          {stack.map(s => <li key={s} className="px-3 py-2 border border-black/10">{s}</li>)}
         </ul>
       </div>
     </Section>

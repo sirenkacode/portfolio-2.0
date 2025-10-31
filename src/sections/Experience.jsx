@@ -10,7 +10,7 @@ export default function Experience() {
         <h2 className="font-display text-3xl sm:text-4xl">Experiencia</h2>
         <div className="mt-6 space-y-5">
           {roles.map(r => (
-            <div key={r.role} className="p-5 rounded-2xl border border-black/10">
+            <div key={r.role} className="p-5 border border-black/10">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">{r.role}</h3>
                 <span className="text-zinc-600 text-sm">{r.period}</span>

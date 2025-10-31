@@ -1,144 +1,152 @@
 // src/components/SideNav.jsx
-import { useEffect, useState, useCallback } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useState, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 const SECTIONS = [
-  { id: 'info',        label: 'info' },
-  { id: 'licencias',   label: 'licencias' },
-  { id: 'proyectos',   label: 'proyectos' },
-  { id: 'stack',       label: 'stack' },
-  { id: 'experiencia', label: 'experiencia' },
-  { id: 'contacto',    label: 'contacto' },
-]
+  { id: "info",        label: "info" },
+  { id: "licencias",   label: "licencias" },
+  { id: "proyectos",   label: "proyectos" },
+  { id: "stack",       label: "stack" },
+  { id: "experiencia", label: "experiencia" },
+  { id: "contacto",    label: "contacto" },
+];
 
 export default function SideNav() {
-  const [active, setActive] = useState('info')
-  const [open, setOpen] = useState(false)
+  const [active, setActive] = useState("info");
+  const [open, setOpen] = useState(false);
 
-  // Marca la sección activa al hacer scroll
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
-      { threshold: 0.6 }
-    )
-    SECTIONS.forEach(({ id }) => {
-      const el = document.getElementById(id)
-      if (el) obs.observe(el)
-    })
-    return () => obs.disconnect()
-  }, [])
-
-  // Navegar a una sección y cerrar el menú móvil
   const go = useCallback((id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    setOpen(false)
-  }, [])
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setActive(id);
+    setOpen(false);
+  }, []);
 
-  // Cerrar con ESC
+  // Scrollspy
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && setOpen(false)
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const vis = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (vis[0]?.target?.id) setActive(vis[0].target.id);
+      },
+      { threshold: [0.4, 0.6, 0.8] }
+    );
+    SECTIONS.forEach((s) => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
-  // Evitar scroll del fondo cuando el menú móvil está abierto
+  // Lock scroll cuando el drawer está abierto
   useEffect(() => {
-    if (open) document.body.style.overflow = 'hidden'
-    else document.body.style.overflow = ''
-  }, [open])
+    document.body.style.overflow = open ? "hidden" : "";
+  }, [open]);
 
+  // ===== DESKTOP (te gustó así): minimal, sin sombras =====
   return (
     <>
-      {/* Rail vertical (solo ≥ md) */}
       <aside className="hidden md:block fixed right-6 top-1/2 -translate-y-1/2 z-40">
-        <nav aria-label="Secciones" className="flex flex-col items-end gap-3">
-          {SECTIONS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => go(s.id)}
-              className={
-                'text-right uppercase tracking-wide text-xs md:text-sm transition ' +
-                (active === s.id ? 'font-extrabold text-black' : 'text-zinc-500 hover:text-black')
-              }
-            >
-              {s.label}
-            </button>
-          ))}
+        <nav aria-label="Secciones" className="flex flex-col items-end gap-2">
+          {SECTIONS.map((s) => {
+            const isActive = active === s.id;
+            return (
+              <button
+                key={s.id}
+                onClick={() => go(s.id)}
+                className={`uppercase tracking-wide text-xs px-2 py-1 transition 
+                  border-b ${isActive ? "border-black" : "border-transparent hover:border-black/30"}
+                  bg-transparent text-black`}
+                aria-current={isActive ? "true" : "false"}
+              >
+                {s.label}
+              </button>
+            );
+          })}
         </nav>
       </aside>
 
-      {/* Botón hamburguesa (solo < md) */}
+      {/* ===== MOBILE: FAB hamburguesa + bottom-sheet vertical ===== */}
+      {/* Botón hamburguesa (FAB) */}
       <button
-        type="button"
-        aria-label="Abrir menú"
-        aria-controls="mobile-menu"
-        aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="md:hidden fixed bottom-5 right-5 z-40 grid place-items-center w-12 h-12 rounded-full border border-black/10 bg-white/90 backdrop-blur shadow-lg"
+        className="md:hidden fixed bottom-6 right-6 z-50 rounded-full border border-black/15 bg-white p-3"
+        aria-label="Abrir navegación"
+        aria-expanded={open}
+        aria-controls="mobile-sheet"
       >
-        {/* Ícono hamburguesa */}
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        {/* ícono hamburguesa minimal */}
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-black">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>
 
-      {/* Menú móvil: overlay + bottom sheet */}
+      {/* Overlay + Drawer desde ABAJO (lista VERTICAL) */}
       <AnimatePresence>
         {open && (
-          <motion.div
-            key="overlay"
-            className="md:hidden fixed inset-0 z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {/* Fondo oscuro clickable para cerrar */}
-            <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-
-            {/* Sheet inferior */}
+          <>
+            {/* Overlay clickeable */}
             <motion.div
-              id="mobile-menu"
+              key="overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.2 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="md:hidden fixed inset-0 z-40 bg-black"
+              onClick={() => setOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.nav
+              key="sheet"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 260, damping: 28 }}
+              className="md:hidden fixed inset-x-0 bottom-0 z-50 bg-white border-t border-black/10 rounded-t-2xl p-4"
               role="dialog"
               aria-modal="true"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-              className="absolute bottom-0 left-0 right-0 rounded-t-3xl bg-white p-6 pb-8 shadow-2xl"
-              style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
+              id="mobile-sheet"
             >
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm uppercase tracking-wider">Navegación</h2>
-                <button
-                  className="p-2 -m-2"
-                  aria-label="Cerrar menú"
-                  onClick={() => setOpen(false)}
-                >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </button>
+              {/* tirador */}
+              <div className="flex justify-center pb-2">
+                <div className="h-1.5 w-12 rounded-full bg-black/15" />
               </div>
 
-              <ul className="mt-4 divide-y divide-black/10">
-                {SECTIONS.map((s) => (
-                  <li key={s.id}>
-                    <button
-                      onClick={() => go(s.id)}
-                      className={
-                        'w-full text-left py-4 text-lg tracking-wide capitalize ' +
-                        (active === s.id ? 'font-extrabold' : 'font-normal')
-                      }
-                    >
-                      {s.label}
-                    </button>
-                  </li>
-                ))}
+              {/* LISTA VERTICAL (no horizontal) */}
+              <ul className="flex flex-col gap-2">
+                {SECTIONS.map((s) => {
+                  const isActive = active === s.id;
+                  return (
+                    <li key={s.id}>
+                      <button
+                        onClick={() => go(s.id)}
+                        className={`w-full text-left uppercase tracking-wide text-sm px-3 py-2 border 
+                          ${isActive ? "bg-black text-white border-black" : "bg-black/5 hover:bg-black/10 border-black/10 text-black"}`}
+                        aria-current={isActive ? "true" : "false"}
+                      >
+                        {s.label}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
-            </motion.div>
-          </motion.div>
+
+              {/* cerrar */}
+              <div className="mt-3 flex justify-end">
+                <button
+                  onClick={() => setOpen(false)}
+                  className="text-xs uppercase tracking-wide underline underline-offset-4"
+                >
+                  cerrar
+                </button>
+              </div>
+            </motion.nav>
+          </>
         )}
       </AnimatePresence>
     </>
-  )
+  );
 }
